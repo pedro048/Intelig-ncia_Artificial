@@ -3,9 +3,10 @@ package algoritmogegetico;
 
 public class Cromossomo{
     public String genes;
-    public double avaliacao=0;
+    public double avaliacao;
     
     Cromossomo(int tamanho){
+        this.avaliacao=0;
         int i;
         this.genes="";
         for(i=0; i<tamanho; i++){

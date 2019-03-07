@@ -14,9 +14,11 @@ public class AlgoritmoGegetico{
        
         Populacao p1 = new Populacao(4, 8, 6); //(tamanho da populacao, tamanho do cromossomo, numero de geracoes)
         //System.out.println(p1.mostrarPopulacao());
+        
         int i;	
 	for (i=0;i<p1.numGeracoes;++i) {
-		System.out.println("Geracao "+i+"\n");
+            
+               	System.out.println("Geracao "+i+"\n");
                 
 		p1.avaliaTodos();
 		p1.geracao();
@@ -26,8 +28,7 @@ public class AlgoritmoGegetico{
         
 	i=p1.determinaMelhor();
 	System.out.println(p1.populacao.get(i).genes);
-               
-           
+                
     }
     
 }
