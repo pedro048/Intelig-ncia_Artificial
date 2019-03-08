@@ -39,7 +39,20 @@ public class Cromossomo{
         }
         return aux;
     }
-    
+    /*
+    public class MyClass {
+    public static void main(String args[]) {
+       String bin = "0011";
+       String parte1 = bin.substring(0,2);
+       int num1 = Integer.parseInt(parte1, 2);
+       String parte2 = bin.substring(2,4);
+       int num2 = Integer.parseInt(parte2, 2);
+       System.out.println(num1);
+       System.out.println("\n");
+       System.out.println(num2);
+    }
+}
+ */   
     public double calculaAvaliacao(){
         double x = this.converteBooleano(0, 21);
         double y = this.converteBooleano(22, 43);
