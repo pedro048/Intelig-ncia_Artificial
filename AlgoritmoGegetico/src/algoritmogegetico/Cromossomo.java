@@ -1,12 +1,12 @@
 
 package algoritmogegetico;
 
-public class Cromossomo{
+public class Cromossomo {
     public String genes;
-    public double avaliacao;
+    public double aptidao;
     
-    Cromossomo(int tamanho){
-        this.avaliacao=0;
+    Cromossomo(int tamanho){ //construtor usado para a populacao inicial
+        this.aptidao=0;
         int i;
         this.genes="";
         for(i=0; i<tamanho; i++){
@@ -18,88 +18,71 @@ public class Cromossomo{
         }
     }
     
-     public String getGenes() {
+    Cromossomo(String pai1, String pai2, Double chance){ //construtor de filhos usando crossover e mutacao
+        //crossover
+        String aux1, aux2, fim1, fim2;
+        String auxMutacao, fimMutacao;
+        int tamanho = pai1.length();
+        
+        aux1 = pai1.substring(0, ((tamanho)/2));
+        fim1 = pai1.substring(((tamanho)/2), tamanho);
+        
+        aux2 = pai2.substring(0, ((tamanho)/2));
+        fim2 = pai2.substring(((tamanho)/2), tamanho);
+        
+        if(java.lang.Math.random()<0.5){
+            this.genes = aux1+fim2;
+        }else{
+            this.genes = aux2+fim1;
+        }
+        //mutacao
+        int tamMutacao=this.genes.length();
+        
+        if(java.lang.Math.random()<chance){
+            auxMutacao=this.genes.substring(0);
+            fimMutacao=this.genes.substring(1, tamMutacao-1);
+            if(auxMutacao.equals("1")){
+                 auxMutacao="0";
+                    
+            }else{
+                 auxMutacao="1";
+            }
+            this.genes=auxMutacao+fimMutacao;
+        }
+        
+    }
+    
+    public String getGenes() {
         return genes;
     }
 
-    public double getAvaliacao() {
-        return avaliacao;
+    public void setGenes(String genes) {
+        this.genes = genes;
     }
-      
-    public float converteBooleano(int inicio, int fim){
-        int i;
-        float aux=0;
+
+    public double getAptidao() {
+        return aptidao;
+    }
+    
+    public int booleanoParaInteiro(int inicio, int fim){
         String s = this.getGenes();
-        for(i = inicio; i <= fim; ++i){
-            aux*=2;
-            
-            if(s.substring(i,i+1).equals("1")) {
-                aux += 1;
-            }  
-        }
-        return aux;
+        String parte = s.substring(inicio, fim);
+        int num = Integer.parseInt(parte, 2);
+        
+        return num;
     }
-    /*
-    public class MyClass {
-    public static void main(String args[]) {
-       String bin = "0011";
-       String parte1 = bin.substring(0,2);
-       int num1 = Integer.parseInt(parte1, 2);
-       String parte2 = bin.substring(2,4);
-       int num2 = Integer.parseInt(parte2, 2);
-       System.out.println(num1);
-       System.out.println("\n");
-       System.out.println(num2);
-    }
-}
- */   
+    
     public double calculaAvaliacao(){
-        double x = this.converteBooleano(0, 21);
-        double y = this.converteBooleano(22, 43);
+        int x = this.booleanoParaInteiro(0, 4);
+        int y = this.booleanoParaInteiro(4, 8);
+        /*
         x = x*0.00004768372718899898-100;
         y = y*0.00004768372718899898-100;
-        this.avaliacao = Math.abs(x*y*Math.sin(y*Math.PI/4));
+        */
+          this.aptidao = Math.abs(x*y*Math.sin(y*Math.PI/4));
+        //this.aptidao = x+y;
         
-        return this.avaliacao;
-    }
-    
-    public Cromossomo crossoverUmPonto(Cromossomo segundoPai){
-        String aux1;
-        Cromossomo retorno=null;
-        int pontoCorte = (new Double(java.lang.Math.random()*this.genes.length())).intValue();
-        if(java.lang.Math.random()<0.5){
-            aux1 = this.genes.substring(0, pontoCorte) + segundoPai.getGenes().substring(pontoCorte, segundoPai.getGenes().length());
-        }else{
-            aux1=segundoPai.getGenes().substring(0, pontoCorte) + this.genes.substring(pontoCorte, this.genes.length());
-        }
-        return retorno;
-    }
-    
-    public void mutacao(double chance){
-        int i;
-        int tamanho=this.genes.length();
-        String aux, inicio, fim;
-        for(i=0; i<tamanho; i++){
-            if(java.lang.Math.random()<chance){
-                aux=this.genes.substring(i, i+1);
-                if(aux.equals("1")){
-                    aux="0";
-                }else{
-                    aux="1";
-                }
-                inicio=this.genes.substring(0, i);
-                fim=this.genes.substring(i+1, tamanho);
-                this.genes=inicio+aux+fim;
-            }
-        }
-    }
-    /*
-    public String toString() {
-        return("Cromossomo:"+this.genes+"\n Avaliacao:"+this.avaliacao);
-    }
-    */
-    public boolean equals(Cromossomo outroElemento) {
-            return(genes.equals(outroElemento.getGenes()));
+        return this.aptidao;
     }
     
 }
