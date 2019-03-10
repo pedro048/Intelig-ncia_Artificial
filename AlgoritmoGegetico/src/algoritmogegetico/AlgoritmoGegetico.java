@@ -4,31 +4,18 @@ package algoritmogegetico;
 public class AlgoritmoGegetico{
     
     public static void main(String[] args) {
-        /*
-        Cromossomo e1 = new Cromossomo(4);
-        System.out.println("cromossomo 1: "+e1.genes);
-        Cromossomo e2 = new Cromossomo(4);
-        System.out.println("cromossomo 2: "+e2.genes);
-        */
+        Populacao p1 = new Populacao(3, 8, 4);
+        System.out.println(p1.mostrar());
+        System.out.println("\n");
         
-       
-        Populacao p1 = new Populacao(4, 8, 6); //(tamanho da populacao, tamanho do cromossomo, numero de geracoes)
-        //System.out.println(p1.mostrarPopulacao());
-        
-        int i;	
-	for (i=0;i<p1.numGeracoes;++i) {
+        for(int i=0; i<p1.numGeracoes; i++){ //O numero de geracoes he o criterio de parada
+            System.out.println("\nGeracao "+i+"\n");
             
-               	System.out.println("Geracao "+i+"\n");
-                
-		p1.avaliaTodos();
-		p1.geracao();
-                p1.moduloPopulacao();
-   
-	}
-        
-	i=p1.determinaMelhor();
-	System.out.println(p1.populacao.get(i).genes);
-                
+            System.out.println(p1.mostraGeracao());
+        }
+        int i = p1.determinaMelhor();
+        System.out.println("\n"+"Melhor individuo = "+p1.populacao.get(i).genes+" | Aptidao = "+p1.populacao.get(i).getAptidao()+"\n");
+            
     }
     
 }
