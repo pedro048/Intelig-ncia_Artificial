@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1553757075 source:c:\users\thiago\documents\ga_pid\main.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+
