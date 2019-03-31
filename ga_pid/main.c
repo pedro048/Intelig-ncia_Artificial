@@ -42,7 +42,6 @@ float pid(float vel, float setpoint, float kp, float ki, float kd, clock_t tempo
   erro = setpoint - vel;
   tempo = clock() - tempo;
   dt = (float)tempo/CLOCKS_PER_SEC;
-  //erro_dif = (erro - erro_ant)/dt;
   erro_dif = (erro - erro_ant)/dt;
   erro_int += erro_ant*dt;
   float saida = erro*kp + erro_dif*kd + erro_int*ki;
