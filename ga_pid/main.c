@@ -166,6 +166,48 @@ void elitismo(INDIVIDUO populacao[TAM]){
 
 }
 
+// FUNCIONAMENTO DAS EDOs !!!
+/*
+// W => velocidade (v.p. = variavel de processo)
+//falta identificar Wkw
+double eqDiferencialCorrente(double W, double Wkw){
+//corrente
+//return  (W - (Ia * Ra + Wkw + Va))/La;
+   return (W - (4.6 * 1 + Wkw + 12))/0,5;
+}
+
+
+double Wn1, Wkwn1, Wn=valor_inicial, Wkwn=valor_inicial;
+void euler_corrente(double Wn, double Wkwn){
+   Wkwn1 = Wkwn + h*eqDiferencialCorrente(double Wn, double Wkwn)
+   Wn1 = Wn + h;
+   
+   Wkwn = Wkwn1;
+   Wn = Wn1;
+}
+   
+// Iaki => Solucao do PID (corrente)
+// W => velocidade (v.p.)
+// falta identificar Tc !!!
+double eqDiferencialVelocidade(double Iaki, double Tc, double W){
+//velocidade
+//return  (Iaki - (W * b + Tc + Tae))/J;
+	return (Iaki - (W * 0,1 + Tc + Tae))/0,01;
+
+}
+
+double Iakin1, Tcn1, Wn1, Iakin=valor_inicial, Tcn=valor_inicial, Wn=valor_inicial;
+void euler_vel(double Iakin, double Tcn, double Wn){
+	Wn1 = Wn + h*eqDiferencialVelocidade(double Iakin, double Tcn, double Wn);
+	Tcn1 = Tcn + h;
+	Iakin1 = Iakin + h;
+
+	Wn = Wn1;
+	Tcn = Tcn1;
+	Iakin = Iakin1;
+}
+*/
+
 int main (){
 
     srand(time(NULL));
