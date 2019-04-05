@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define ADPORTA 0
 #define VEL_MAX_MOTOR 100.0
-#define TAM 4 //quantidade de cromossomos
+#define TAM 15 //quantidade de cromossomos
 #define SETPOINT  40.0
 //#define VEL  20.0 //simula a velocidade do motor em um dado momento
 
 
-//float VEL=0;
+float v=0;
 float erro = 0, erro_ant= 0, erro_dif = 0, erro_int = 0, dt= 0;
 
 
@@ -20,15 +21,40 @@ typedef struct individuo {
 
 }INDIVIDUO;
 
+int binario_decimal(int cromossomo[8])
+{
+    int soma=0, k = 7;
+
+    for(int i=0; i<8; i++){
+        soma += cromossomo[i] * pow(2,k);
+        k--;
+    }
+    return soma;
+}
+
+void gerarBinario(int binario[8]){
+    int i;
+    for(i=0; i<8; i++){
+        int aux = rand() % 2;
+        binario[i] = aux;
+    }
+
+}
+
 //void gerarPopulacao (INDIVIDUO populacao[TAM]){
 void gerarPopulacao(INDIVIDUO populacao[TAM]){
 	int i, j;
-    //RAND_MAX eh definido como 0x7fffffff
+	int binario[8];
+    //real = inferior + ((superior - inferior)/((pow(2,tamanhoBinario)-1)*vBinario))
     for (i=0; i<TAM; i++){
         for (j=0; j<3; j++){
-            populacao[i].cromossomo[j] = 100* ((float)rand()/RAND_MAX);
+            gerarBinario(binario);
+            populacao[i].cromossomo[0] = 0.1 + (((10 - 0.1)/(pow(2,8)-1))*binario_decimal(binario));
+            populacao[i].cromossomo[1] = (0.99/(pow(2,8)-1))*binario_decimal(binario);
+            populacao[i].cromossomo[2] = (0.099/(pow(2,8)-1))*binario_decimal(binario);
         }
     }
+
 }
 
 //float altura, erro, erro_dif, erro_int, setpoint, kp, ki, kd, dt;
@@ -37,23 +63,30 @@ void gerarPopulacao(INDIVIDUO populacao[TAM]){
 
 float velocidade(){
     int aux = rand() % 11;
-    float v = 0;
-    if(aux > 5){
-       v +=20;
-    }else{
-        if(v != 0){
-            v -=10;
-        }
+    //float v = 0;
+    if(aux < 8){
+       v +=5;
+    } else{
+        if((v != 0) && (v>0))
+            v -=5;
     }
-    return v;
+    if(v >= 100){
+        v = 0;
+    }
+    //printf("VELOCIDADE: %.2f", v);
+    //printf("\n");
+    //return v;
 }
 
 float pid(float vel, float setpoint, float kp, float ki, float kd, clock_t tempo){
-
+  //printf("TEMPO: %.2f",(float)tempo);
+  //printf("\n");
   erro_ant = erro;
   erro = setpoint - vel;
   tempo = clock() - tempo;
   dt = (float)tempo/CLOCKS_PER_SEC;
+  //printf("TEMPO: %.2f",(float)tempo);
+  //printf("\n");
   erro_dif = (erro - erro_ant)/dt;
   erro_int += erro_ant*dt;
   float saida = erro*kp + erro_dif*kd + erro_int*ki;
@@ -66,16 +99,39 @@ float pid(float vel, float setpoint, float kp, float ki, float kd, clock_t tempo
 }
 
 //setar os parametros do pid
-void chamarPID (INDIVIDUO crom, clock_t tempo, float veloc){
+float chamarPID (INDIVIDUO crom, clock_t tempo){
     float kp, ki, kd;
+    float aux;
     kp = crom.cromossomo[0];
     ki = crom.cromossomo[1];
     kd = crom.cromossomo[2];
+    //kp = 2;
+    //ki = 0.2;
+    //kd = 0.02;
     //dt = rand () % 11;
-	crom.spid = pid(veloc, SETPOINT, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
+	aux = pid(v, SETPOINT, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
+	printf("chamandoPID: %.2f", aux);
+	printf("\n");
+    return aux;
+
+}
+
+//calcula avaliacao
+void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
+
+	int i;
+    for(i=0; i<TAM; i++){
+        velocidade();
+        popul[i].erroInd = abs(SETPOINT - v);
+        popul[i].spid = chamarPID(popul[i], tempo);
+        //printf("PID_FIT: %.2f\n\n",popul[i].spid);
+    }
+
+
 }
 
 void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
+    /*
     int indice1 = rand() % 3, indice2;
     float aux1,aux2;
 
@@ -87,12 +143,14 @@ void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
 
     populacao[i_pai].cromossomo[indice1] = aux2;
     populacao[i_mae].cromossomo[indice2] = aux1;
+    */
+
 
 }
 
 void mutacao(INDIVIDUO popul[TAM]){
     float mut = rand()/RAND_MAX;
-    float taxa_mutacao = 0.2;
+    float taxa_mutacao = 0.02;
     int indiv = rand() % TAM;
     int gen = rand() % 3;
 
@@ -101,24 +159,11 @@ void mutacao(INDIVIDUO popul[TAM]){
     }
 }
 
-//calcula avaliacao
-void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
-
-	int i;
-    for(i=0; i<TAM; i++){
-        float auxVel = velocidade();
-        popul[i].erroInd = SETPOINT - auxVel;
-        chamarPID(popul[i], tempo,auxVel);
-    }
-
-}
-
 //seleciona o individuo com o menor erro
 void selecao (INDIVIDUO populacao[TAM]){
     int numTorneio = 0, i,k=0;
     int indice1 = rand() % 3, indice2 = rand() % 3;
     INDIVIDUO ganhador[TAM];
-
     while (numTorneio < 4) {
         numTorneio++;
         if (populacao[indice1].erroInd < populacao[indice2].erroInd){
@@ -166,47 +211,25 @@ void elitismo(INDIVIDUO populacao[TAM]){
 
 }
 
-// FUNCIONAMENTO DAS EDOs !!!
-/*
-// W => velocidade (v.p. = variavel de processo)
-//falta identificar Wkw
-double eqDiferencialCorrente(double W, double Wkw){
-//corrente
-//return  (W - (Ia * Ra + Wkw + Va))/La;
-   return (W - (4.6 * 1 + Wkw + 12))/0,5;
+void mostraMelhor(INDIVIDUO populacao[TAM]){
+    INDIVIDUO melhor;
+    int j,i;
+
+    for(j=0; j<TAM-1; j++){
+        if(populacao[j].erroInd < populacao[j+1].erroInd){
+            for(i=0; i<3; i++){
+                melhor.cromossomo[i] = populacao[j].cromossomo[i];
+            }
+        }
+    }
+    printf("Melhor Individuo: ");
+    for(i=0; i<3; i++){
+        printf("%.2f  ",melhor.cromossomo[i]);
+    }
+    printf("\n");
 }
 
 
-double Wn1, Wkwn1, Wn=valor_inicial, Wkwn=valor_inicial;
-void euler_corrente(double Wn, double Wkwn){
-   Wkwn1 = Wkwn + h*eqDiferencialCorrente(double Wn, double Wkwn)
-   Wn1 = Wn + h;
-   
-   Wkwn = Wkwn1;
-   Wn = Wn1;
-}
-   
-// Iaki => Solucao do PID (corrente)
-// W => velocidade (v.p.)
-// falta identificar Tc !!!
-double eqDiferencialVelocidade(double Iaki, double Tc, double W){
-//velocidade
-//return  (Iaki - (W * b + Tc + Tae))/J;
-	return (Iaki - (W * 0,1 + Tc + Tae))/0,01;
-
-}
-
-double Iakin1, Tcn1, Wn1, Iakin=valor_inicial, Tcn=valor_inicial, Wn=valor_inicial;
-void euler_vel(double Iakin, double Tcn, double Wn){
-	Wn1 = Wn + h*eqDiferencialVelocidade(double Iakin, double Tcn, double Wn);
-	Tcn1 = Tcn + h;
-	Iakin1 = Iakin + h;
-
-	Wn = Wn1;
-	Tcn = Tcn1;
-	Iakin = Iakin1;
-}
-*/
 
 int main (){
 
@@ -217,16 +240,22 @@ int main (){
 
     printf("Geracao Inicial:\n");
     gerarPopulacao(populacao);
-	int i;/*
-	for(i=0; i<TAM; i++){
-		chamarPID(populacao[i], tempo);
-	}
-	*/
+	int i;
+
     fitneas(populacao,tempo);
     imprimir(populacao);
     printf("\n");
 
-    int qtd_geracoes= 20, cont=0;
+    for(i=0; i<TAM; i++){
+        printf("PIDs: %.2f\n\n",populacao[i].spid);
+    }
+    /*
+     for(i=0; i<TAM; i++){
+        printf("FITNEAS: %.2f\n\n",populacao[i].erroInd);
+    }
+    */
+    /*
+    int qtd_geracoes= 5, cont=0;
     while(cont < qtd_geracoes){
         cont++;
         selecao(populacao);
@@ -236,33 +265,38 @@ int main (){
         }
 
         mutacao(populacao);
-        /*
-        int j;
-        for(j=0; j<TAM; j++){
-            chamarPID(populacao[j], tempo);
-        }
-        */
+
         //elitismo(populacao);
         fitneas(populacao,tempo);
         printf("Geracao %i:\n",cont);
         imprimir(populacao);
 
     }
-    printf("\n\n\n\n");
-
-
-  //TESTE DO CRUZAMENTO
-    /*
-     for(; indice<TAM; indice+=2){
-
-            cruzamento(populacao,indice,indice+1);
-            imprimir(populacao);
-             printf("\n");
-        }
-
-    //populacao[3].erro = fitneas();
     */
+     printf("PID: %.2f",pid(20, SETPOINT, 20.96,72.54,95.7,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 3.2,0.32,0.032,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 5.9,0.59,0.059,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 7.8,0.65,0.081,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 2.2,0.22,0.022,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 1.5,0.15,0.015,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 9.89,0.98,0.098,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 6.7,3.1,1.2,tempo));
+     printf("\n");
+     printf("PID: %.2f",pid(20, SETPOINT, 20.9,12.1,8.45,tempo));
+     printf("\n");
 
+
+
+
+    float x =  (((abs(0.15 - 225))/(pow(2,8)-1))*3) + 0.15;
+    printf("X = %.2f",x);
 
     system("pause");
     return 0;
