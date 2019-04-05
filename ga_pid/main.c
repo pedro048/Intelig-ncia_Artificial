@@ -5,7 +5,7 @@
 
 #define ADPORTA 0
 #define VEL_MAX_MOTOR 100.0
-#define TAM 15 //quantidade de cromossomos
+#define TAM 14 //quantidade de cromossomos
 #define SETPOINT  40.0
 //#define VEL  20.0 //simula a velocidade do motor em um dado momento
 
@@ -61,7 +61,7 @@ void gerarPopulacao(INDIVIDUO populacao[TAM]){
 
 //float pid(float vel, float erro, float erro_dif, float erro_int, float setpoint, float kp, float ki, float kd, float dt){
 
-float velocidade(){
+void velocidade(){
     int aux = rand() % 11;
     //float v = 0;
     if(aux < 8){
@@ -110,8 +110,8 @@ float chamarPID (INDIVIDUO crom, clock_t tempo){
     //kd = 0.02;
     //dt = rand () % 11;
 	aux = pid(v, SETPOINT, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
-	printf("chamandoPID: %.2f", aux);
-	printf("\n");
+	//printf("chamandoPID: %.2f", aux);
+	//printf("\n");
     return aux;
 
 }
@@ -131,19 +131,20 @@ void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
 }
 
 void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
-    /*
-    int indice1 = rand() % 3, indice2;
+
+    int indice1 = rand() % 3;
+    //printf("INDICE X: %d\n",indice1);
     float aux1,aux2;
 
     aux1 = populacao[i_pai].cromossomo[indice1];
-    do{
-        indice2 = rand() % 3;
-    }while(indice1 == indice2);
-    aux2 = populacao[i_mae].cromossomo[indice2];
+    //do{
+    //    indice2 = rand() % 3;
+    //}while(indice1 == indice2);
+    aux2 = populacao[i_mae].cromossomo[indice1];
 
     populacao[i_pai].cromossomo[indice1] = aux2;
-    populacao[i_mae].cromossomo[indice2] = aux1;
-    */
+    populacao[i_mae].cromossomo[indice1] = aux1;
+
 
 
 }
@@ -153,9 +154,23 @@ void mutacao(INDIVIDUO popul[TAM]){
     float taxa_mutacao = 0.02;
     int indiv = rand() % TAM;
     int gen = rand() % 3;
-
+    int binario[8];
+    gerarBinario(binario);
     if(mut<=taxa_mutacao){
         popul[indiv].cromossomo[gen] = 100* ((float)rand()/RAND_MAX);
+    }
+    if(mut <= taxa_mutacao){
+        if(gen == 0){
+            popul[indiv].cromossomo[0] = 0.1 + (((10 - 0.1)/(pow(2,8)-1))*binario_decimal(binario));
+        }
+        else if (gen== 1){
+            popul[indiv].cromossomo[1] = (0.99/(pow(2,8)-1))*binario_decimal(binario);
+
+        }
+        else{
+            popul[indiv].cromossomo[2] = (0.099/(pow(2,8)-1))*binario_decimal(binario);
+
+        }
     }
 }
 
@@ -212,20 +227,20 @@ void elitismo(INDIVIDUO populacao[TAM]){
 }
 
 void mostraMelhor(INDIVIDUO populacao[TAM]){
-    INDIVIDUO melhor;
-    int j,i;
 
-    for(j=0; j<TAM-1; j++){
-        if(populacao[j].erroInd < populacao[j+1].erroInd){
-            for(i=0; i<3; i++){
-                melhor.cromossomo[i] = populacao[j].cromossomo[i];
-            }
+    int iMelhor = 0, i,j;
+    float aptidaoMelhor = populacao[0].erroInd;
+
+    for(i=0; i<TAM; i++){
+        float aptidao = populacao[i].erroInd;
+        if(aptidao < aptidaoMelhor){
+            iMelhor = i;
+            aptidaoMelhor = aptidao;
         }
     }
-    printf("Melhor Individuo: ");
-    for(i=0; i<3; i++){
-        printf("%.2f  ",melhor.cromossomo[i]);
-    }
+    printf("Melhor individuo: ");
+    for (j=0; j<3; j++)
+        printf("%.2f  ",populacao[iMelhor].cromossomo[j]);
     printf("\n");
 }
 
@@ -246,9 +261,18 @@ int main (){
     imprimir(populacao);
     printf("\n");
 
-    for(i=0; i<TAM; i++){
-        printf("PIDs: %.2f\n\n",populacao[i].spid);
+    //for(i=0; i<TAM; i++){
+    //    printf("PIDs: %.2f\n\n",populacao[i].spid);
+    //}
+
+    for(i=0; i<TAM; i+=2){
+            cruzamento(populacao,i,i+1);
     }
+    mutacao(populacao);
+    fitneas(populacao,tempo);
+    //selecao(populacao);
+    //imprimir(populacao);
+
     /*
      for(i=0; i<TAM; i++){
         printf("FITNEAS: %.2f\n\n",populacao[i].erroInd);
@@ -273,6 +297,7 @@ int main (){
 
     }
     */
+    /*
      printf("PID: %.2f",pid(20, SETPOINT, 20.96,72.54,95.7,tempo));
      printf("\n");
      printf("PID: %.2f",pid(20, SETPOINT, 3.2,0.32,0.032,tempo));
@@ -297,6 +322,7 @@ int main (){
 
     float x =  (((abs(0.15 - 225))/(pow(2,8)-1))*3) + 0.15;
     printf("X = %.2f",x);
+    */
 
     system("pause");
     return 0;
