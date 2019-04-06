@@ -17,7 +17,7 @@
 
 
 //float v=0;
-float vel_rpm = 5.00;
+float vel_rpm = 0.5;
 float erro_ant = 0, erro_dif = 0, erro_int = 0, dt= 0;
 
 
@@ -121,8 +121,8 @@ float chamarPID (INDIVIDUO crom, float erro, clock_t tempo){
     //kd = 0.02;
     //dt = rand () % 11;
     aux = pid(erro, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
-    printf("chamandoPID: %.2f", aux);
-    printf("\n");
+    //printf("chamandoPID: %.2f", aux);
+    //printf("\n");
     return aux;
 }
 
@@ -138,29 +138,27 @@ void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
     int i;
     for(i=0; i<TAM; i++){
         //velocidade();
+        printf("Vrpm: %.2f\n\n",vel_rpm);
         popul[i].erroInd = abs(SETPOINT - vel_rpm);
         popul[i].spid = chamarPID(popul[i], popul[i].erroInd, tempo);
-        //printf("PID_FIT: %.2f\n\n",popul[i].spid);
+        printf("PID_FIT: %.2f\n\n",popul[i].spid);
         vel_rpm = velocidade_rpm(popul[i].spid);
+
     }
 }
 
 void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
-
-    int indice1 = rand() % 3;
-    //printf("INDICE X: %d\n",indice1);
+    int indice1 = rand() % 3, indice2;
     float aux1,aux2;
 
     aux1 = populacao[i_pai].cromossomo[indice1];
-    //do{
-    //    indice2 = rand() % 3;
-    //}while(indice1 == indice2);
-    aux2 = populacao[i_mae].cromossomo[indice1];
+    do{
+        indice2 = rand() % 3;
+    }while(indice1 == indice2);
+    aux2 = populacao[i_mae].cromossomo[indice2];
 
     populacao[i_pai].cromossomo[indice1] = aux2;
-    populacao[i_mae].cromossomo[indice1] = aux1;
-
-
+    populacao[i_mae].cromossomo[indice2] = aux1;
 
 }
 
@@ -169,23 +167,9 @@ void mutacao(INDIVIDUO popul[TAM]){
     float taxa_mutacao = 0.02;
     int indiv = rand() % TAM;
     int gen = rand() % 3;
-    int binario[8];
-    gerarBinario(binario);
+
     if(mut<=taxa_mutacao){
         popul[indiv].cromossomo[gen] = 100* ((float)rand()/RAND_MAX);
-    }
-    if(mut <= taxa_mutacao){
-        if(gen == 0){
-            popul[indiv].cromossomo[0] = 0.1 + (((10 - 0.1)/(pow(2,8)-1))*binario_decimal(binario));
-        }
-        else if (gen== 1){
-            popul[indiv].cromossomo[1] = (0.99/(pow(2,8)-1))*binario_decimal(binario);
-
-        }
-        else{
-            popul[indiv].cromossomo[2] = (0.099/(pow(2,8)-1))*binario_decimal(binario);
-
-        }
     }
 }
 
@@ -242,20 +226,20 @@ void elitismo(INDIVIDUO populacao[TAM]){
 }
 
 void mostraMelhor(INDIVIDUO populacao[TAM]){
+    INDIVIDUO melhor;
+    int j,i;
 
-    int iMelhor = 0, i,j;
-    float aptidaoMelhor = populacao[0].erroInd;
-
-    for(i=0; i<TAM; i++){
-        float aptidao = populacao[i].erroInd;
-        if(aptidao < aptidaoMelhor){
-            iMelhor = i;
-            aptidaoMelhor = aptidao;
+    for(j=0; j<TAM-1; j++){
+        if(populacao[j].erroInd < populacao[j+1].erroInd){
+            for(i=0; i<3; i++){
+                melhor.cromossomo[i] = populacao[j].cromossomo[i];
+            }
         }
     }
-    printf("Melhor individuo: ");
-    for (j=0; j<3; j++)
-        printf("%.2f  ",populacao[iMelhor].cromossomo[j]);
+    printf("Melhor Individuo: ");
+    for(i=0; i<3; i++){
+        printf("%.2f  ",melhor.cromossomo[i]);
+    }
     printf("\n");
 }
 
@@ -294,7 +278,20 @@ int main (){
     }
     */
     /*
-    int qtd_geracoes= 5, cont=0;
+    srand(time(NULL));
+    clock_t tempo;
+    tempo = clock();
+    INDIVIDUO populacao[TAM];
+
+    printf("Geracao Inicial:\n");
+    gerarPopulacao(populacao);
+	int i;
+    fitneas(populacao,tempo);
+    imprimir(populacao);
+
+    printf("\n");
+
+    int qtd_geracoes= 20, cont=0;
     while(cont < qtd_geracoes){
         cont++;
         selecao(populacao);
@@ -311,32 +308,7 @@ int main (){
         imprimir(populacao);
 
     }
-    */
-    /*
-     printf("PID: %.2f",pid(20, SETPOINT, 20.96,72.54,95.7,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 3.2,0.32,0.032,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 5.9,0.59,0.059,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 7.8,0.65,0.081,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 2.2,0.22,0.022,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 1.5,0.15,0.015,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 9.89,0.98,0.098,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 6.7,3.1,1.2,tempo));
-     printf("\n");
-     printf("PID: %.2f",pid(20, SETPOINT, 20.9,12.1,8.45,tempo));
-     printf("\n");
 
-
-
-
-    float x =  (((abs(0.15 - 225))/(pow(2,8)-1))*3) + 0.15;
-    printf("X = %.2f",x);
     */
 
     system("pause");
