@@ -3,15 +3,22 @@
 #include <time.h>
 #include <math.h>
 
-#define ADPORTA 0
-#define VEL_MAX_MOTOR 100.0
-#define TAM 14 //quantidade de cromossomos
-#define SETPOINT  40.0
+//#define ADPORTA 0
+#define VEL_rpm_MAX_MOTOR 100.0 // velocidade em rpm
+#define TAM 4 //quantidade de cromossomos
+#define SETPOINT  40.0 // velocidade em rpm
+//#define VEL_rpm_INICIAL 5.00 // velocidade rpm inicial
+/*
+ * vp = velocidade em rpm
+ * vm = velocidade angular
+ */
+
 //#define VEL  20.0 //simula a velocidade do motor em um dado momento
 
 
-float v=0;
-float erro = 0, erro_ant= 0, erro_dif = 0, erro_int = 0, dt= 0;
+//float v=0;
+float vel_rpm = 5.00;
+float erro_ant = 0, erro_dif = 0, erro_int = 0, dt= 0;
 
 
 typedef struct individuo {
@@ -60,7 +67,7 @@ void gerarPopulacao(INDIVIDUO populacao[TAM]){
 //float altura, erro, erro_dif, erro_int, setpoint, kp, ki, kd, dt;
 
 //float pid(float vel, float erro, float erro_dif, float erro_int, float setpoint, float kp, float ki, float kd, float dt){
-
+/*
 void velocidade(){
     int aux = rand() % 11;
     //float v = 0;
@@ -77,21 +84,25 @@ void velocidade(){
     //printf("\n");
     //return v;
 }
+*/
 
-float pid(float vel, float setpoint, float kp, float ki, float kd, clock_t tempo){
+float pid(float erro, float kp, float ki, float kd, clock_t tempo){
   //printf("TEMPO: %.2f",(float)tempo);
   //printf("\n");
-  erro_ant = erro;
-  erro = setpoint - vel;
+  //erro = setpoint - vel;
   tempo = clock() - tempo;
   dt = (float)tempo/CLOCKS_PER_SEC;
   //printf("TEMPO: %.2f",(float)tempo);
   //printf("\n");
   erro_dif = (erro - erro_ant)/dt;
   erro_int += erro_ant*dt;
+
   float saida = erro*kp + erro_dif*kd + erro_int*ki;
-  if(saida > VEL_MAX_MOTOR){
-    saida = VEL_MAX_MOTOR;
+
+  erro_ant = erro;
+
+  if(saida > VEL_rpm_MAX_MOTOR){
+    saida = VEL_rpm_MAX_MOTOR;
   }else if(saida < 0.0){
     saida = 0.0;
   }
@@ -99,7 +110,7 @@ float pid(float vel, float setpoint, float kp, float ki, float kd, clock_t tempo
 }
 
 //setar os parametros do pid
-float chamarPID (INDIVIDUO crom, clock_t tempo){
+float chamarPID (INDIVIDUO crom, float erro, clock_t tempo){
     float kp, ki, kd;
     float aux;
     kp = crom.cromossomo[0];
@@ -109,25 +120,29 @@ float chamarPID (INDIVIDUO crom, clock_t tempo){
     //ki = 0.2;
     //kd = 0.02;
     //dt = rand () % 11;
-	aux = pid(v, SETPOINT, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
-	//printf("chamandoPID: %.2f", aux);
-	//printf("\n");
+    aux = pid(erro, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
+    printf("chamandoPID: %.2f", aux);
+    printf("\n");
     return aux;
+}
 
+float velocidade_rpm(float spid){
+    float rpm = 60*spid;
+
+    return rpm;
 }
 
 //calcula avaliacao
 void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
 
-	int i;
+    int i;
     for(i=0; i<TAM; i++){
-        velocidade();
-        popul[i].erroInd = abs(SETPOINT - v);
-        popul[i].spid = chamarPID(popul[i], tempo);
+        //velocidade();
+        popul[i].erroInd = abs(SETPOINT - vel_rpm);
+        popul[i].spid = chamarPID(popul[i], popul[i].erroInd, tempo);
         //printf("PID_FIT: %.2f\n\n",popul[i].spid);
+        vel_rpm = velocidade_rpm(popul[i].spid);
     }
-
-
 }
 
 void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
