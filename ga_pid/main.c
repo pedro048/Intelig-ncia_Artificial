@@ -4,9 +4,9 @@
 #include <math.h>
 
 //#define ADPORTA 0
-#define VEL_rpm_MAX_MOTOR 100.0 // velocidade em rpm
+#define VEL_rpm_MAX_MOTOR 90.0 // velocidade em rpm
 #define TAM 4 //quantidade de cromossomos
-#define SETPOINT  40.0 // velocidade em rpm
+#define SETPOINT 5000.0 // velocidade em rpm
 //#define VEL_rpm_INICIAL 5.00 // velocidade rpm inicial
 /*
  * vp = velocidade em rpm
@@ -17,8 +17,8 @@
 
 
 //float v=0;
-float vel_rpm = 0.5;
-float erro_ant = 0, erro_dif = 0, erro_int = 0, dt= 0;
+float vel_rpm = 0.0;
+float erro_ant = 0.0, erro_total = 0.0; //erro_dif = 0, erro_int = 0, dt= 0;
 
 
 typedef struct individuo {
@@ -31,8 +31,8 @@ typedef struct individuo {
 int binario_decimal(int cromossomo[8])
 {
     int soma=0, k = 7;
-
-    for(int i=0; i<8; i++){
+    int i;
+    for(i=0; i<8; i++){
         soma += cromossomo[i] * pow(2,k);
         k--;
     }
@@ -50,8 +50,8 @@ void gerarBinario(int binario[8]){
 
 //void gerarPopulacao (INDIVIDUO populacao[TAM]){
 void gerarPopulacao(INDIVIDUO populacao[TAM]){
-	int i, j;
-	int binario[8];
+    int i, j;
+    int binario[8];
     //real = inferior + ((superior - inferior)/((pow(2,tamanhoBinario)-1)*vBinario))
     for (i=0; i<TAM; i++){
         for (j=0; j<3; j++){
@@ -90,22 +90,33 @@ float pid(float erro, float kp, float ki, float kd, clock_t tempo){
   //printf("TEMPO: %.2f",(float)tempo);
   //printf("\n");
   //erro = setpoint - vel;
+
+  //system("pause");
   tempo = clock() - tempo;
-  dt = (float)tempo/CLOCKS_PER_SEC;
+  //printf("\ntempo2: %f \n", (float)tempo);
+  //float dt = (float)tempo/CLOCKS_PER_SEC;
+  float dt = 0.1;
+//printf("dt: %f \n", dt);
+//printf("\n erro: %f \n", erro);
   //printf("TEMPO: %.2f",(float)tempo);
   //printf("\n");
-  erro_dif = (erro - erro_ant)/dt;
-  erro_int += erro_ant*dt;
-
+  float erro_dif = (erro - erro_ant)/dt;
+//printf("\n erro_dif: %f \n", erro_dif);
+  float erro_int = erro_int + erro_ant*dt;
+//printf("\n erro_int: %f \n", erro_int);
   float saida = erro*kp + erro_dif*kd + erro_int*ki;
 
+//printf("\n erro_ant: %f \n", erro_ant);
   erro_ant = erro;
 
+//printf("\n saida do pid sem trucamento: %f \n", saida);
+
   if(saida > VEL_rpm_MAX_MOTOR){
-    saida = VEL_rpm_MAX_MOTOR;
+    saida = saida/VEL_rpm_MAX_MOTOR;
   }else if(saida < 0.0){
     saida = 0.0;
   }
+
   return saida;
 }
 
@@ -113,12 +124,16 @@ float pid(float erro, float kp, float ki, float kd, clock_t tempo){
 float chamarPID (INDIVIDUO crom, float erro, clock_t tempo){
     float kp, ki, kd;
     float aux;
+
     kp = crom.cromossomo[0];
     ki = crom.cromossomo[1];
     kd = crom.cromossomo[2];
-    //kp = 2;
-    //ki = 0.2;
-    //kd = 0.02;
+
+    /*
+    kp = 2;
+    ki = 0.2;
+    kd = 0.02;
+    */
     //dt = rand () % 11;
     aux = pid(erro, kp, ki, kd, tempo); //Associa um valor de solucao do pid a cada cromossomo
     //printf("chamandoPID: %.2f", aux);
@@ -138,63 +153,31 @@ void fitneas(INDIVIDUO popul[TAM], clock_t tempo){
     int i;
     for(i=0; i<TAM; i++){
         //velocidade();
-        printf("Vrpm: %.2f\n\n",vel_rpm);
-        popul[i].erroInd = abs(SETPOINT - vel_rpm);
-        popul[i].spid = chamarPID(popul[i], popul[i].erroInd, tempo);
-        printf("PID_FIT: %.2f\n\n",popul[i].spid);
+    //printf("Vrpm: %.2f\n\n",vel_rpm);
+        erro_total = abs(SETPOINT - vel_rpm);
+        popul[i].spid = chamarPID(popul[i], erro_total, tempo);
+    printf("\n solucao pid: %.2f\n\n",popul[i].spid);
         vel_rpm = velocidade_rpm(popul[i].spid);
+    //printf("\n vel rpm: %.2f\n\n",vel_rpm);
+        popul[i].erroInd = abs(SETPOINT - vel_rpm);
+    //printf("\n erro do cromossomo: %.2f\n\n", popul[i].erroInd);
 
     }
 }
 
 void cruzamento (INDIVIDUO populacao[TAM], int i_pai, int i_mae){
-//void cruzamento(INDIVIDUO populacao[TAM],INDIVIDUO filhoP,INDIVIDUO filhoM, clock_t tempo){
-
-    int indice1 = rand() % 3;
-    //printf("INDICE X: %d\n",indice1);
+    int indice1 = rand() % 3, indice2;
     float aux1,aux2;
 
     aux1 = populacao[i_pai].cromossomo[indice1];
-    //do{
-    //    indice2 = rand() % 3;
-    //}while(indice1 == indice2);
-    aux2 = populacao[i_mae].cromossomo[indice1];
+    do{
+        indice2 = rand() % 3;
+    }while(indice1 == indice2);
+    aux2 = populacao[i_mae].cromossomo[indice2];
 
     populacao[i_pai].cromossomo[indice1] = aux2;
-    populacao[i_mae].cromossomo[indice1] = aux1;
+    populacao[i_mae].cromossomo[indice2] = aux1;
 
-    /*
-    int indice1 = rand() % 3,i_pai = rand() % TAM, i_mae,i,j,k;
-    float aux1,aux2;
-    for(k=0; k<4; k++){
-        aux1 = populacao[i_pai].cromossomo[indice1];
-        do{
-            i_mae = rand() % TAM;
-        }while(i_pai == i_mae);
-        aux2 = populacao[i_mae].cromossomo[indice1];
-
-        for(i=0; i<3;i++){
-            filhoP.cromossomo[i] = populacao[i_pai].cromossomo[i];
-            filhoM.cromossomo[i] = populacao[i_mae].cromossomo[i];
-        }
-        filhoP.cromossomo[i_pai] = aux2;
-        filhoM.cromossomo[i_mae] = aux1;
-        fitneasFILHO(filhoP,tempo);
-        fitneasFILHO(filhoM,tempo);
-        if(filhoP.erroInd <populacao[i_pai].erroInd){
-            for(j=0; j<3; j++){
-                populacao[i_pai].cromossomo[i] = filhoP.cromossomo[i];
-            }
-            fitneas(populacao,tempo);
-        }
-        if(filhoM.erroInd <populacao[i_pai].erroInd){
-            for(j=0; j<3; j++){
-                populacao[i_mae].cromossomo[i] = filhoM.cromossomo[i];
-            }
-            fitneas(populacao,tempo);
-        }
-    }
-    */
 }
 
 void mutacao(INDIVIDUO popul[TAM]){
@@ -202,51 +185,32 @@ void mutacao(INDIVIDUO popul[TAM]){
     float taxa_mutacao = 0.02;
     int indiv = rand() % TAM;
     int gen = rand() % 3;
-    int binario[8];
-    gerarBinario(binario);
+
     if(mut<=taxa_mutacao){
         popul[indiv].cromossomo[gen] = 100* ((float)rand()/RAND_MAX);
     }
-    if(mut <= taxa_mutacao){
-        if(gen == 0){
-            popul[indiv].cromossomo[0] = 0.1 + (((10 - 0.1)/(pow(2,8)-1))*binario_decimal(binario));
-        }
-        else if (gen== 1){
-            popul[indiv].cromossomo[1] = (0.99/(pow(2,8)-1))*binario_decimal(binario);
-
-        }
-        else{
-            popul[indiv].cromossomo[2] = (0.099/(pow(2,8)-1))*binario_decimal(binario);
-
-        }
-    }
 }
 
+//seleciona o individuo com o menor erro
 void selecao (INDIVIDUO populacao[TAM]){
-
-    int numTorneio = TAM, i,k=0,j,t;
+    int numTorneio = 0, i,k=0;
+    int indice1 = rand() % 3, indice2 = rand() % 3;
     INDIVIDUO ganhador[TAM];
-
-    for(t=0; t<numTorneio; t++) {
-        int indice1 = rand() % TAM, indice2 = rand() % TAM;
-        if(indice1 != indice2){
-            if (populacao[indice1].erroInd < populacao[indice2].erroInd){
-                for(j=0; j<3; j++)
-                    ganhador[k].cromossomo[j] = populacao[indice1].cromossomo[j];
-                k++;
-            }
-            else {
-                for(j=0; j<3; j++)
-                    ganhador[k].cromossomo[j] = populacao[indice2].cromossomo[j];
-                k++;
-            }
+    while (numTorneio < 4) {
+        numTorneio++;
+        if (populacao[indice1].erroInd < populacao[indice2].erroInd){
+            ganhador[k] = populacao[indice1];
+            k++;
+        }
+        else {
+            ganhador[k] = populacao[indice2];
+            k++;
         }
     }
     for (i=0; i<TAM; i++){
-        for(j=0; j<3; j++){
-            populacao[i].cromossomo[j] = ganhador[i].cromossomo[j];
-        }
-
+        populacao[i] = ganhador[i]; /*A populacao eh substituida pelos cromossomos aptos para o cruzamento
+                                      Enviar essa populacao de aptos para o cruzamento
+                                    */
     }
 }
 
@@ -256,6 +220,13 @@ void imprimir(INDIVIDUO populacao[TAM]){
         for(j=0; j<3; j++){
             printf("%.2f   ", populacao[i].cromossomo[j]);
         }
+        printf("\n");
+    }
+    printf("\n");
+
+    for(i=0; i<TAM; i++){
+        printf("Erro do cromossomo %i ", i+1);
+        printf(" = %f", populacao[i].erroInd);
         printf("\n");
     }
     printf("\n");
@@ -279,22 +250,26 @@ void elitismo(INDIVIDUO populacao[TAM]){
 
 }
 
-void mostraMelhor(INDIVIDUO populacao[TAM]){
+INDIVIDUO mostraMelhor(INDIVIDUO populacao[TAM]){
+    INDIVIDUO melhor;
+    int j,i;
 
-    int iMelhor = 0, i,j;
-    float aptidaoMelhor = populacao[0].erroInd;
-
-    for(i=0; i<TAM; i++){
-        float aptidao = populacao[i].erroInd;
-        if(aptidao < aptidaoMelhor){
-            iMelhor = i;
-            aptidaoMelhor = aptidao;
+    for(j=0; j<TAM-1; j++){
+        if(populacao[j].erroInd < populacao[j+1].erroInd){
+            for(i=0; i<3; i++){
+                melhor.cromossomo[i] = populacao[j].cromossomo[i];
+            }
         }
     }
-    printf("Melhor individuo: ");
-    for (j=0; j<3; j++)
-        printf("%.2f  ",populacao[iMelhor].cromossomo[j]);
+    /*
+    printf("Melhor Individuo (kp, ki, kd): ");
+    for(i=0; i<3; i++){
+        printf("%.2f  ",melhor.cromossomo[i]);
+    }
     printf("\n");
+    */
+
+    return melhor;
 }
 
 
@@ -306,9 +281,12 @@ int main (){
     tempo = clock();
     INDIVIDUO populacao[TAM];
 
+    printf("Cromossomos formados por kp, ki, kd");
+    printf("\n\n");
     printf("Geracao Inicial:\n");
+    printf("\n");
+    //printf("tempo1: %f \n ", (float)tempo);
     gerarPopulacao(populacao);
-	int i;
 
     fitneas(populacao,tempo);
     imprimir(populacao);
@@ -318,50 +296,51 @@ int main (){
     //    printf("PIDs: %.2f\n\n",populacao[i].spid);
     //}
 
-    for(i=0; i<TAM; i+=2){
-            cruzamento(populacao,i,i+1);
-    }
-    mutacao(populacao);
-    fitneas(populacao,tempo);
-    //selecao(populacao);
-    //imprimir(populacao);
-
-    /*
-     for(i=0; i<TAM; i++){
-        printf("FITNEAS: %.2f\n\n",populacao[i].erroInd);
-    }
-    */
-    /*
-        srand(time(NULL));
-    clock_t tempo;
-    tempo = clock();
-    INDIVIDUO populacao[TAM], filhoP, filhoM;
-    int i;
-
-    printf("Geracao 0:\n");
-    gerarPopulacao(populacao);
-    fitneas(populacao,tempo);
-    imprimir(populacao);
-    printf("\n");
-    int qtd_geracoes= 5, cont;
-    for(cont=1; cont<qtd_geracoes; cont++){
-
+    int qtd_geracoes= 4, cont=0;
+    while(cont < qtd_geracoes){
+        cont++;
         selecao(populacao);
+
+        int i;
         for(i=0; i<TAM; i+=2){
             cruzamento(populacao,i,i+1);
         }
         mutacao(populacao);
         fitneas(populacao,tempo);
         printf("Geracao %i:\n",cont);
+        printf("\n");
         imprimir(populacao);
+     }
+   printf("\n");
+   printf("Melhor Individuo (kp, ki, kd): ");
+   int p;
+   for(p=0; p<3; p++){
+       printf("%.2f  ", mostraMelhor(populacao).cromossomo[p]);
+   }
+   printf("\n");
 
+
+   //Controle PID
+
+
+    int contador=0;
+    erro_total=0.0;
+    while(contador<200){
+        erro_total = abs(SETPOINT - vel_rpm);
+        float solucao = chamarPID(mostraMelhor(populacao), erro_total, tempo);
+        vel_rpm = velocidade_rpm(solucao);
+
+        contador++;
     }
     printf("\n");
-    mostraMelhor(populacao);
+    printf("velocidade final em rpm = %f ", vel_rpm);
+    printf("\n\n");
 
-    */
-	
+
+
+
 
     system("pause");
     return 0;
 }
+
