@@ -1,0 +1,77 @@
+#CLASSIFICAÇÃO DE TEXTO POR MEIO DO DATA SET 20 NEWSGROUPS  - é utilizado popularmente, tem vários documentos divididos em várias categorias
+  
+
+from sklearn.datasets import fetch_20newsgroups 
+from sklearn.feature_extraction.text import TfidfVectorizer #converte os textos em números
+
+# um classificador linear que utiliza o Gradiente Descendente Estocástico como método de treino. Por padrão, utiliza o estimador SVM.
+from sklearn.linear_model import SGDClassifier
+# Uma rede neural Perceptron Multicamadas
+from sklearn.neural_network import MLPClassifier
+
+from sklearn import metrics #pacote que usa metricas para avaliar eficiencia do modelo
+
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+#redução das categorias em politicas e automoveis - subset(subconjunto de dados escolhido), shuffle (embaralha os dados para evitar que o programa fique tendencioso) 
+categories = ['talk.politics.misc', 'rec.autos']
+twenty_train = fetch_20newsgroups(subset='train',categories=categories, shuffle=True, random_state=42)
+
+# Nomes das categorias
+print(twenty_train.target_names) #verifica os nomes das categorias escolhidas
+
+# O scikit-learn carrega os rótulo como um array de inteiros....
+twenty_train.target[:10] #visualiza as categorias dos 10 últimos pontos de dados do conjunto de treino
+
+# Mas, é possível visualizar os nomes das categorias da seguinte forma
+for t in twenty_train.target[:10]:
+    print(twenty_train.target_names[t]) #ver os nomes
+
+#Reducao da frequencia que uma palavra aparece no texto w = tf * log(N/df)
+vectorizer = TfidfVectorizer()
+X_train_tfidf_vectorize = vectorizer.fit_transform(twenty_train.data)
+
+# Aqui nós treinamos o classificador
+#funcao de perda hinge, penalidade - fator que controla o tamanho dos  vetores de peso, numero maximo de ireracoes
+#clf = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)
+clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(70, ), random_state=1, verbose=True)
+#passa os dados de treino e os rótulos de cada um 
+clf.fit(X_train_tfidf_vectorize, twenty_train.target)
+
+#os dados que estão em test são desconhecidos pelo modelo
+twenty_test = fetch_20newsgroups(subset='test', categories=categories, shuffle=True, random_state=42)
+docs_test = twenty_test.data
+
+vect_transform = vectorizer.transform(docs_test)
+predicted = clf.predict(vect_transform)
+
+
+print(metrics.classification_report(twenty_test.target, predicted,target_names=twenty_test.target_names))
+
+print(clf.classes_) #ordem das classes
+
+confusion_matrix = confusion_matrix(twenty_test.target, predicted)
+print(confusion_matrix)
+
+plt.matshow(confusion_matrix)
+plt.title("Matriz de confusão")
+plt.colorbar()
+plt.ylabel("Classificações corretas")
+plt.xlabel("Classificações obtidas")
+plt.show()
+
+
+#Dados novos em inglês
+docs_new = [
+    'Wednesday morning, the legal team had appeared to turn back toward more discreet lawyering, with the announcement that Washington trial lawyer Emmet Flood would join the team inside the White House.',
+    'By the time Rolls-Royce unveiled its one-of-a-kind Serenity Phantom at the 2015 Geneva Motor Show.'
+]
+
+X_new_tfidf_vectorize = vectorizer.transform(docs_new)
+
+predicted = clf.predict(X_new_tfidf_vectorize)
+
+for doc, category in zip(docs_new, predicted):
+    print('%r => %s' % (doc, twenty_train.target_names[category]))
