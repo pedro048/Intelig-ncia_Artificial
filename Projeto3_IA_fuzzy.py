@@ -30,38 +30,7 @@ pedido_certo['totalmente diferente'] = fuzz.trimf(pedido_certo.universe, [0, 0, 
 pedido_certo['um pouco diferente'] = fuzz.trimf(pedido_certo.universe, [2, 5, 6])
 pedido_certo['igual'] = fuzz.trimf(pedido_certo.universe, [4, 8, 10])
 # ---------------------------------------------------------------------------------------
-temperatura_da_comida = ctrl.Antecedent(np.arange(0, 11, 1), 'temperatura_da_comida')
 
-temperatura_da_comida['muito diferente da certa'] = fuzz.trimf(temperatura_da_comida.universe, [0, 0, 5])
-temperatura_da_comida['um pouco diferente'] = fuzz.trimf(temperatura_da_comida.universe, [2, 3, 6])
-temperatura_da_comida['correta'] = fuzz.trimf(temperatura_da_comida.universe, [5, 9, 10])
-# ---------------------------------------------------------------------------------------
-sabor = ctrl.Antecedent(np.arange(0, 11, 1), 'sabor')
-
-sabor['ruim'] = fuzz.trimf(sabor.universe, [0, 1, 4])
-sabor['bom'] = fuzz.trimf(sabor.universe, [2, 3, 4])
-sabor['otimo'] = fuzz.trimf(sabor.universe, [3, 5, 10])
-# ---------------------------------------------------------------------------------------
-
-# antecedentes relacionados com a estrutura do restaurante
-estacionamento = ctrl.Antecedent(np.arange(0, 11, 1), 'estacionamento')
-
-estacionamento['muito pequeno ou nao tem'] = fuzz.trimf(estacionamento.universe, [0, 2, 4])
-estacionamento['mais ou menos confortavel'] = fuzz.trimf(estacionamento.universe, [3, 4, 5])
-estacionamento['confortavel'] = fuzz.trimf(estacionamento.universe, [3, 4, 10])
-# ---------------------------------------------------------------------------------------
-quantidade_de_mesas = ctrl.Antecedent(np.arange(0, 11, 1), 'quantidade_de_mesas')
-
-quantidade_de_mesas['pequena'] = fuzz.trimf(quantidade_de_mesas.universe, [0, 0, 7])
-quantidade_de_mesas['media'] = fuzz.trimf(quantidade_de_mesas.universe, [4, 5, 8])
-quantidade_de_mesas['grande'] = fuzz.trimf(quantidade_de_mesas.universe, [5, 9, 10])
-# ---------------------------------------------------------------------------------------
-temperatura_do_ambiente = ctrl.Antecedent(np.arange(0, 11, 1), 'temperatura_do_ambiente')
-
-temperatura_do_ambiente['muito diferente da agradavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [0, 2, 4])
-temperatura_do_ambiente['um pouco desconfortavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [2, 5, 6])
-temperatura_do_ambiente['agradavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [3, 7, 10])
-# ---------------------------------------------------------------------------------------
 '''
 qualidade_atendimento.automf(3)
 tempo_entrega_pedido.automf(3)
@@ -131,11 +100,6 @@ def grau_de_satisfacao(satisfacao):
 satisfacao_tipping.input['qualidade_atendimento'] = 5.0
 satisfacao_tipping.input['tempo_entrega_pedido'] = 2.0
 satisfacao_tipping.input['pedido_certo'] = 10.0
-satisfacao_tipping.input['temperatura_da_comida'] = 6.0
-satisfacao_tipping.input['sabor'] = 8.0
-satisfacao_tipping.input['estacionamento'] = 9.0
-satisfacao_tipping.input['quantidade_de_mesas'] = 4.0
-satisfacao_tipping.input['temperatura_do_ambiente'] = 9.0
 satisfacao_tipping.compute()
 
 print(satisfacao_tipping.output['satisfacao'])
@@ -147,11 +111,6 @@ satisfacao.view(sim=satisfacao_tipping)
 satisfacao_tipping.input['qualidade_atendimento'] = 8.0
 satisfacao_tipping.input['tempo_entrega_pedido'] = 7.0
 satisfacao_tipping.input['pedido_certo'] = 10.0
-satisfacao_tipping.input['temperatura_da_comida'] = 9.0
-satisfacao_tipping.input['sabor'] = 6.0
-satisfacao_tipping.input['estacionamento'] = 7.0
-satisfacao_tipping.input['quantidade_de_mesas'] = 9.0
-satisfacao_tipping.input['temperatura_do_ambiente'] = 8.0
 satisfacao_tipping.compute()
 
 print(satisfacao_tipping.output['satisfacao'])
@@ -163,11 +122,6 @@ satisfacao.view(sim=satisfacao_tipping)
 satisfacao_tipping.input['qualidade_atendimento'] = 10.0
 satisfacao_tipping.input['tempo_entrega_pedido'] = 3.0
 satisfacao_tipping.input['pedido_certo'] = 7.0
-satisfacao_tipping.input['temperatura_da_comida'] = 8.0
-satisfacao_tipping.input['sabor'] = 7.0
-satisfacao_tipping.input['estacionamento'] = 1.0
-satisfacao_tipping.input['quantidade_de_mesas'] = 5.0
-satisfacao_tipping.input['temperatura_do_ambiente'] = 4.0
 satisfacao_tipping.compute()
 
 print(satisfacao_tipping.output['satisfacao'])
