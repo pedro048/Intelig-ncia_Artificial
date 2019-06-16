@@ -22,45 +22,45 @@ tempo_entrega_pedido = ctrl.Antecedent(np.arange(0, 11, 1), 'tempo_entrega_pedid
 
 tempo_entrega_pedido['longo'] = fuzz.trimf(tempo_entrega_pedido.universe, [0, 2, 4])
 tempo_entrega_pedido['um pouco demorado'] = fuzz.trimf(tempo_entrega_pedido.universe, [3, 5, 6])
-tempo_entrega_pedido['rapido'] = fuzz.trimf(tempo_entrega_pedido.universe, [4, 8, 10])
+tempo_entrega_pedido['rapido'] = fuzz.trimf(tempo_entrega_pedido.universe, [4, 9, 10])
 # ---------------------------------------------------------------------------------------
 pedido_certo = ctrl.Antecedent(np.arange(0, 11, 1), 'pedido_certo')
 
-pedido_certo['totalmente diferente'] = fuzz.trimf(pedido_certo.universe, [0, 2, 4])
-pedido_certo['um pouco diferente'] = fuzz.trimf(pedido_certo.universe, [3, 5, 6])
+pedido_certo['totalmente diferente'] = fuzz.trimf(pedido_certo.universe, [0, 0, 3])
+pedido_certo['um pouco diferente'] = fuzz.trimf(pedido_certo.universe, [2, 5, 6])
 pedido_certo['igual'] = fuzz.trimf(pedido_certo.universe, [4, 8, 10])
 # ---------------------------------------------------------------------------------------
 temperatura_da_comida = ctrl.Antecedent(np.arange(0, 11, 1), 'temperatura_da_comida')
 
-temperatura_da_comida['muito diferente da certa'] = fuzz.trimf(temperatura_da_comida.universe, [0, 2, 4])
-temperatura_da_comida['um pouco diferente'] = fuzz.trimf(temperatura_da_comida.universe, [3, 5, 6])
-temperatura_da_comida['correta'] = fuzz.trimf(temperatura_da_comida.universe, [4, 8, 10])
+temperatura_da_comida['muito diferente da certa'] = fuzz.trimf(temperatura_da_comida.universe, [0, 0, 5])
+temperatura_da_comida['um pouco diferente'] = fuzz.trimf(temperatura_da_comida.universe, [2, 3, 6])
+temperatura_da_comida['correta'] = fuzz.trimf(temperatura_da_comida.universe, [5, 9, 10])
 # ---------------------------------------------------------------------------------------
 sabor = ctrl.Antecedent(np.arange(0, 11, 1), 'sabor')
 
-sabor['ruim'] = fuzz.trimf(sabor.universe, [0, 2, 4])
-sabor['bom'] = fuzz.trimf(sabor.universe, [3, 5, 6])
-sabor['otimo'] = fuzz.trimf(sabor.universe, [4, 8, 10])
+sabor['ruim'] = fuzz.trimf(sabor.universe, [0, 1, 4])
+sabor['bom'] = fuzz.trimf(sabor.universe, [2, 3, 4])
+sabor['otimo'] = fuzz.trimf(sabor.universe, [3, 5, 10])
 # ---------------------------------------------------------------------------------------
 
 # antecedentes relacionados com a estrutura do restaurante
 estacionamento = ctrl.Antecedent(np.arange(0, 11, 1), 'estacionamento')
 
 estacionamento['muito pequeno ou nao tem'] = fuzz.trimf(estacionamento.universe, [0, 2, 4])
-estacionamento['mais ou menos confortavel'] = fuzz.trimf(estacionamento.universe, [3, 5, 6])
-estacionamento['confortavel'] = fuzz.trimf(estacionamento.universe, [4, 8, 10])
+estacionamento['mais ou menos confortavel'] = fuzz.trimf(estacionamento.universe, [3, 4, 5])
+estacionamento['confortavel'] = fuzz.trimf(estacionamento.universe, [3, 4, 10])
 # ---------------------------------------------------------------------------------------
 quantidade_de_mesas = ctrl.Antecedent(np.arange(0, 11, 1), 'quantidade_de_mesas')
 
-quantidade_de_mesas['pequena'] = fuzz.trimf(quantidade_de_mesas.universe, [0, 2, 4])
-quantidade_de_mesas['media'] = fuzz.trimf(quantidade_de_mesas.universe, [3, 5, 6])
-quantidade_de_mesas['grande'] = fuzz.trimf(quantidade_de_mesas.universe, [4, 8, 10])
+quantidade_de_mesas['pequena'] = fuzz.trimf(quantidade_de_mesas.universe, [0, 0, 7])
+quantidade_de_mesas['media'] = fuzz.trimf(quantidade_de_mesas.universe, [4, 5, 8])
+quantidade_de_mesas['grande'] = fuzz.trimf(quantidade_de_mesas.universe, [5, 9, 10])
 # ---------------------------------------------------------------------------------------
 temperatura_do_ambiente = ctrl.Antecedent(np.arange(0, 11, 1), 'temperatura_do_ambiente')
 
 temperatura_do_ambiente['muito diferente da agradavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [0, 2, 4])
-temperatura_do_ambiente['um pouco desconfortavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [3, 5, 6])
-temperatura_do_ambiente['agradavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [4, 8, 10])
+temperatura_do_ambiente['um pouco desconfortavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [2, 5, 6])
+temperatura_do_ambiente['agradavel'] = fuzz.trimf(temperatura_do_ambiente.universe, [3, 7, 10])
 # ---------------------------------------------------------------------------------------
 '''
 qualidade_atendimento.automf(3)
@@ -106,7 +106,7 @@ regra3 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['rapido'
 # indiferente
 
 regra4 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
-regra5 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['rapida'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra5 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['rapido'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
 regra6 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
 # satisfação alta
 
