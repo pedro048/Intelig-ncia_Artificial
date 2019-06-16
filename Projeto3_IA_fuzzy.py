@@ -100,19 +100,19 @@ temperatura_do_ambiente.view()
 
 # Definindo as regras de agregação
 # satisfação baixa
-regra1 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['longo'] & pedido_certo['totalmente diferente'] & temperatura_da_comida['muito diferente da certa'] & sabor['ruim'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['muito diferente da agradavel'], satisfacao['baixa'])
-regra2 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['muito diferente da agradavel'],satisfacao['baixa'])
-regra3 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['baixa'])
+regra1 = ctrl.Rule(qualidade_atendimento['ruim'] | tempo_entrega_pedido['longo'] & pedido_certo['totalmente diferente'] & temperatura_da_comida['muito diferente da certa'] & sabor['ruim'] | estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] | temperatura_do_ambiente['muito diferente da agradavel'], satisfacao['baixa'])
+regra2 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] | pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['muito diferente da agradavel'],satisfacao['baixa'])
+regra3 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] | sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['baixa'])
 # indiferente
 
-regra4 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
-regra5 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['rapido'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
-regra6 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra4 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] | pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['media'] | temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra5 = ctrl.Rule(qualidade_atendimento['bom'] | tempo_entrega_pedido['rapido'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra6 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] | temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
 # satisfação alta
 
-regra7 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
+regra7 = ctrl.Rule(qualidade_atendimento['otimo'] | tempo_entrega_pedido['rapido'] | pedido_certo['igual'] | temperatura_da_comida['correta'] | sabor['otimo'] | estacionamento['confortavel'] | quantidade_de_mesas['grande'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
 regra8 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
-regra9 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
+regra9 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] | sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['media'] | temperatura_do_ambiente['agradavel'],satisfacao['alta'])
 
 
 
