@@ -12,25 +12,15 @@ import matplotlib.pyplot as plt
 
 # antecedentes relacionados com a comida
 qualidade_atendimento = ctrl.Antecedent(np.arange(0, 11, 1), 'qualidade_atendimento')
-
-qualidade_atendimento['ruim'] = fuzz.trimf(qualidade_atendimento.universe, [0, 0, 4])
-qualidade_atendimento['bom'] = fuzz.trimf(qualidade_atendimento.universe, [2, 4, 6])
-qualidade_atendimento['otimo'] = fuzz.trimf(qualidade_atendimento.universe, [4, 8, 10])
-
 # ---------------------------------------------------------------------------------------
 tempo_entrega_pedido = ctrl.Antecedent(np.arange(0, 11, 1), 'tempo_entrega_pedido')
-
-tempo_entrega_pedido['longo'] = fuzz.trimf(tempo_entrega_pedido.universe, [0, 2, 4])
-tempo_entrega_pedido['um pouco demorado'] = fuzz.trimf(tempo_entrega_pedido.universe, [3, 5, 6])
-tempo_entrega_pedido['rapido'] = fuzz.trimf(tempo_entrega_pedido.universe, [4, 9, 10])
 # ---------------------------------------------------------------------------------------
 pedido_certo = ctrl.Antecedent(np.arange(0, 11, 1), 'pedido_certo')
-
-pedido_certo['totalmente diferente'] = fuzz.trimf(pedido_certo.universe, [0, 0, 3])
-pedido_certo['um pouco diferente'] = fuzz.trimf(pedido_certo.universe, [2, 5, 6])
-pedido_certo['igual'] = fuzz.trimf(pedido_certo.universe, [4, 8, 10])
 # ---------------------------------------------------------------------------------------
 
+qualidade_atendimento.automf(3)
+tempo_entrega_pedido.automf(3)
+pedido_certo.automf(3)
 '''
 qualidade_atendimento.automf(3)
 tempo_entrega_pedido.automf(3)
