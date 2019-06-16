@@ -77,10 +77,9 @@ temperatura_do_ambiente.automf(3)
 
 satisfacao = ctrl.Consequent(np.arange(0, 11, 1), 'satisfacao')
 
-satisfacao['baixa'] = fuzz.trimf(satisfacao.universe, [0, 0, 3])
-satisfacao['indiferente'] = fuzz.trimf(satisfacao.universe, [2, 4, 6])
-satisfacao['alta']         = fuzz.trimf(satisfacao.universe, [5, 7, 8])
-satisfacao['muito alta'] = fuzz.trimf(satisfacao.universe, [7, 9,10])
+satisfacao['baixa'] = fuzz.trimf(satisfacao.universe, [0, 0, 5])
+satisfacao['indiferente'] = fuzz.trimf(satisfacao.universe, [3, 6, 8])
+satisfacao['alta']         = fuzz.trimf(satisfacao.universe, [5, 7, 10])
 
 # qualidade do atendimento
 qualidade_atendimento.view()
@@ -99,31 +98,34 @@ quantidade_de_mesas.view()
 # temperatura do ambiente
 temperatura_do_ambiente.view()
 
-# Definindo as regras
+# Definindo as regras de agregação
 # satisfação baixa
 regra1 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['longo'] & pedido_certo['totalmente diferente'] & temperatura_da_comida['muito diferente da certa'] & sabor['ruim'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['muito diferente da agradavel'], satisfacao['baixa'])
-
+regra2 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['muito diferente da agradavel'],satisfacao['baixa'])
+regra3 = ctrl.Rule(qualidade_atendimento['ruim'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['baixa'])
 # indiferente
 
-
+regra4 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['mais ou menos confortavel'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra5 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['rapida'] & pedido_certo['um pouco diferente'] & temperatura_da_comida['um pouco diferente'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
+regra6 = ctrl.Rule(qualidade_atendimento['bom'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['bom'] & estacionamento['muito pequeno ou nao tem'] & quantidade_de_mesas['pequena'] & temperatura_do_ambiente['um pouco desconfortavel'],satisfacao['indiferente'])
 # satisfação alta
 
+regra7 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
+regra8 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['um pouco demorado'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['grande'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
+regra9 = ctrl.Rule(qualidade_atendimento['otimo'] & tempo_entrega_pedido['rapido'] & pedido_certo['igual'] & temperatura_da_comida['correta'] & sabor['otimo'] & estacionamento['confortavel'] & quantidade_de_mesas['media'] & temperatura_do_ambiente['agradavel'],satisfacao['alta'])
 
-# satisfação muito alta
 
 
-satisfacao_tipping_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7])
+satisfacao_tipping_ctrl = ctrl.ControlSystem([regra1, regra2, regra3, regra4, regra5, regra6, regra7, regra8, regra9])
 satisfacao_tipping = ctrl.ControlSystemSimulation(satisfacao_tipping_ctrl)
 
 def grau_de_satisfacao(satisfacao):
-    if satisfacao <= 3:
+    if satisfacao <= 4:
         return "Satisfacao baixa"
-    elif (satisfacao > 3)  & (satisfacao <= 6):
+    elif (satisfacao > 4)  & (satisfacao <= 8):
         return "Não esta satisfeito nem insatisfeito, indiferente"
-    elif (satisfacao > 6) & (satisfacao <= 8):
-        return "Satisfacao alta"
     elif (satisfacao > 8):
-        return "satisfacao muito alta"
+        return "Satisfacao alta"
 		
 # Testes
 
